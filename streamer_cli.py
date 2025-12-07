@@ -23,14 +23,14 @@ sio.connect('https://socketio-server-3n18.onrender.com', transports=['websocket'
 
 while True:
     try:
-        img = ImageGrab.grab().resize((640, 360))
+        img = ImageGrab.grab().resize((1940, 1060))
         buf = io.BytesIO()
         img.save(buf, format='JPEG')
         frame = base64.b64encode(buf.getvalue()).decode('utf-8')
 
         sio.emit('stream', frame)
         print("Frame envoyée !", len(frame), "bytes")
-        time.sleep(0.1)  # ~10 FPS pour test
+        time.sleep(0.03)  # ~10 FPS pour test
 
     except Exception as e:
         print("Erreur:", e)

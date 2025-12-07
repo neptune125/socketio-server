@@ -1,36 +1,29 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 const app = express();
-const server = http.createServer(app);
-
+const server = createServer(app);
 const io = new Server(server, {
-    cors: {
-        origin: '*',   // Autorise toutes les origines (pour test)
-        methods: ['GET', 'POST']
-    }
+    cors: { origin: "*" }
 });
 
-// Simple route pour tester si le serveur est actif
-app.get('/', (req, res) => {
-    res.send('🚀 Serveur Socket.IO actif !');
+app.get("/", (req, res) => {
+    res.send("Socket.IO server running ✔");
 });
 
-// Gestion des connexions Socket.IO
-io.on('connection', (socket) => {
-    console.log(`⚡ Client connecté : ${socket.id}`);
+io.on("connection", socket => {
+    console.log("🔗 Client connecté :", socket.id);
 
-    socket.on('disconnect', () => {
-        console.log(`⚠️ Client déconnecté : ${socket.id}`);
+    socket.on("stream", data => {
+        io.emit("stream", data); // diffuse à tout le monde
     });
 
-    // Recevoir les frames du Python et diffuser aux clients HTML
-    socket.on('stream', (frame) => {
-        socket.broadcast.emit('stream', frame);
+    socket.on("disconnect", () => {
+        console.log("❌ Client déconnecté :", socket.id);
     });
 });
 
-// Port pour Render
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Serveur lancé sur le port ${PORT}`));
+server.listen(process.env.PORT || 3000, () => {
+    console.log("🚀 Serveur Socket.IO opérationnel sur Render");
+});
