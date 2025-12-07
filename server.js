@@ -12,14 +12,30 @@ app.get("/", (req, res) => {
     res.send("Socket.IO server running ✔");
 });
 
+// Dictionnaire pour stocker les clients actifs par client_id
+const clients = {};
+
 io.on("connection", socket => {
     console.log("🔗 Client connecté :", socket.id);
 
     socket.on("stream", data => {
-        io.emit("stream", data); // diffuse à tout le monde
+        const { client_id } = data;
+
+        // Stocker/mettre à jour le socket pour ce client_id
+        clients[client_id] = socket.id;
+
+        // Émettre le flux à tous les clients sauf l’expéditeur
+        socket.broadcast.emit("stream", data);
     });
 
     socket.on("disconnect", () => {
+        // Supprimer le client de la liste
+        for (const id in clients) {
+            if (clients[id] === socket.id) {
+                delete clients[id];
+                break;
+            }
+        }
         console.log("❌ Client déconnecté :", socket.id);
     });
 });
