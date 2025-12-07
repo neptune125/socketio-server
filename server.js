@@ -14,13 +14,21 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("Client connecté :", socket.id);
 
+  // Pour les messages simples
   socket.on("message", (msg) => {
     console.log("Message reçu :", msg);
     socket.emit("message", "Bien reçu !");
   });
+
+  // Pour recevoir les frames du stream Python
+  socket.on("stream", (frame) => {
+    console.log("Frame reçue:", frame.length);
+    // Ici tu peux diffuser à d'autres clients si besoin
+    // io.emit("stream", frame);
+  });
 });
 
-// Lancer le serveurs
+// Lancer le serveur
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
