@@ -5,7 +5,7 @@ import socketio
 import io
 
 sio = socketio.Client()
-sio.connect('http://localhost:3000')  # ou ton IP locale
+sio.connect('http://localhost:3000')  
 
 while True:
     img = ImageGrab.grab()
