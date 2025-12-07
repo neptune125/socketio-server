@@ -1,36 +1,36 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  }
+    cors: {
+        origin: '*',   // Autorise toutes les origines (pour test)
+        methods: ['GET', 'POST']
+    }
 });
 
-// Quand un client se connecte
-io.on("connection", (socket) => {
-  console.log("Client connecté :", socket.id);
-
-  // Pour les messages simples
-  socket.on("message", (msg) => {
-    console.log("Message reçu :", msg);
-    socket.emit("message", "Bien reçu !");
-  });
-
-  // Pour recevoir les frames du stream Python
-  socket.on("stream", (frame) => {
-    console.log("Frame reçue:", frame.length);
-    // Ici tu peux diffuser à d'autres clients si besoin
-    // io.emit("stream", frame);
-  });
+// Simple route pour tester si le serveur est actif
+app.get('/', (req, res) => {
+    res.send('🚀 Serveur Socket.IO actif !');
 });
 
-// Lancer le serveur
+// Gestion des connexions Socket.IO
+io.on('connection', (socket) => {
+    console.log(`⚡ Client connecté : ${socket.id}`);
+
+    socket.on('disconnect', () => {
+        console.log(`⚠️ Client déconnecté : ${socket.id}`);
+    });
+
+    // Recevoir les frames du Python et diffuser aux clients HTML
+    socket.on('stream', (frame) => {
+        socket.broadcast.emit('stream', frame);
+    });
+});
+
+// Port pour Render
 const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-  console.log("Serveur Socket.IO lancé sur le port " + PORT);
-});
+server.listen(PORT, () => console.log(`🚀 Serveur lancé sur le port ${PORT}`));
